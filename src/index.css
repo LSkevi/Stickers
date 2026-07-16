@@ -1,145 +1,342 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------ *
- * Álbum — a floodlit-stadium visual world for a WC26 sticker book.
- * Committed dark theme: night match under the lights, neon pitch line,
- * trophy gold for the rarest finds.
+ * Álbum Copa 2026 — the fast, lightweight bubble tracker Luan likes.
+ * Light theme, green = colada, orange = repetida.
  * ------------------------------------------------------------------ */
 
 :root {
-  --bg: #0b1210;
-  --bg-2: #0e1613;
-  --surface: #13201b;
-  --surface-2: #1a2a24;
-  --line: rgba(233, 255, 245, 0.09);
-  --line-strong: rgba(233, 255, 245, 0.16);
-  --text: #eef4f0;
-  --muted: #91a89e;
-  --muted-2: #6f867c;
-
-  --accent: #16d191; /* pitch neon */
-  --accent-deep: #0e9c6c;
-  --gold: #f4b740;
-  --magenta: #ff2d78;
-
-  --r-common: #8fa39b;
-  --r-rare: #43a9ff;
-  --r-epic: #b478ff;
-  --r-legendary: #f4b740;
-
-  --font-display: 'Anton', 'Arial Narrow', sans-serif;
-  --font-body: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
-
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(0, 0, 0, 0.4);
-  color-scheme: dark;
+  --bg: #f5f5f0;
+  --ink: #1a1a1a;
+  --muted: #666;
+  --muted2: #888;
+  --line: #ddd;
+  --line2: #ccc;
+  --green: #3b6d11;
+  --green-soft: #eaf3de;
+  --green-line: #c5dca0;
+  --orange: #ba7517;
+  --special: #fffbf0;
+  --special-line: #f0e0c0;
+  color-scheme: light;
 }
 
 * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
-  margin: 0;
-  background:
-    radial-gradient(120% 60% at 50% -10%, rgba(22, 209, 145, 0.12), transparent 60%),
-    radial-gradient(90% 50% at 90% 0%, rgba(255, 45, 120, 0.06), transparent 55%),
-    var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
   overscroll-behavior-y: none;
 }
 
-::selection {
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
+.wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 12px 40px;
 }
 
-/* Thin, subtle scrollbars */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--line-strong) transparent;
+/* Sticky header */
+.top {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: calc(env(safe-area-inset-top) + 10px) 0 8px;
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
 }
-*::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
-*::-webkit-scrollbar-thumb {
-  background: var(--line-strong);
-  border-radius: 99px;
+.title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.counter {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+.counter b {
+  color: var(--green);
+  font-size: 16px;
+}
+.counter .rep {
+  color: var(--orange);
+  font-weight: 700;
+}
+.pbar-wrap {
+  background: #e2e2da;
+  border-radius: 5px;
+  height: 9px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.pbar {
+  height: 100%;
+  background: var(--green);
+  border-radius: 5px;
+  transition: width 0.3s;
+}
+.tools {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.search {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--ink);
+}
+.search:focus {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+}
+.btn {
+  padding: 8px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.btn:active {
+  opacity: 0.7;
+}
+.btn.green {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.btn.danger {
+  color: #a12020;
+  border-color: #e0b4b4;
 }
 
-@layer utilities {
-  .font-display {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: 0.01em;
-  }
-  .tnum {
-    font-variant-numeric: tabular-nums;
-  }
-  .safe-b {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .safe-t {
-    padding-top: env(safe-area-inset-top);
-  }
+/* Tools panel */
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: grid;
+  gap: 8px;
+}
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.panel .btn {
+  width: 100%;
+  text-align: center;
 }
 
-/* Holographic shimmer for legendary stickers */
-@keyframes holo-pan {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
+.idx-label {
+  font-size: 11px;
+  color: var(--muted2);
+  margin-bottom: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-.holo::after {
-  content: '';
+.index {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+.index::-webkit-scrollbar {
+  display: none;
+}
+.idx-chip {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.idx-chip:active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.note {
+  font-size: 12px;
+  background: var(--green-soft);
+  border: 1px solid var(--green-line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  color: var(--green);
+  line-height: 1.5;
+}
+.legend {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.leg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ld {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+.ld.on {
+  background: var(--green);
+}
+.ld.off {
+  border: 1.5px solid #bbb;
+}
+.ld.rep {
+  background: var(--green);
+  box-shadow: 0 0 0 2px var(--orange);
+}
+.hint {
+  font-size: 12px;
+  color: var(--muted2);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+/* Team blocks */
+.team {
+  margin-bottom: 14px;
+  scroll-margin-top: 200px;
+}
+.team.special {
+  background: var(--special);
+  border: 1px solid var(--special-line);
+  border-radius: 10px;
+  padding: 10px;
+}
+.team-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e5dd;
+}
+.team-name {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.team-flag {
+  font-size: 18px;
+}
+.team-code {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 600;
+}
+.team-count {
+  font-size: 12px;
+  color: var(--muted2);
+  font-variant-numeric: tabular-nums;
+}
+.team-count.done {
+  color: var(--green);
+  font-weight: 700;
+}
+.bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.bub-wrap {
+  position: relative;
+}
+.bub {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--muted2);
+  background: #fff;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.06s;
+}
+.bub:active {
+  transform: scale(0.84);
+}
+.bub.on {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.badge {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  mix-blend-mode: color-dodge;
-  opacity: 0.35;
-  background: linear-gradient(
-    115deg,
-    transparent 20%,
-    rgba(255, 215, 120, 0.5) 38%,
-    rgba(120, 220, 255, 0.35) 48%,
-    rgba(255, 120, 220, 0.4) 58%,
-    transparent 78%
-  );
-  background-size: 200% 100%;
-  animation: holo-pan 4.5s linear infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .holo::after { animation: none; }
-}
-
-/* Pop when a sticker is newly collected */
-@keyframes stamp {
-  0% { transform: scale(0.4) rotate(-12deg); opacity: 0; }
-  60% { transform: scale(1.12) rotate(3deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
-}
-.animate-stamp {
-  animation: stamp 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-stamp { animation: none; }
-}
-
-button {
-  font-family: inherit;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 9px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bg);
+  font-variant-numeric: tabular-nums;
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--green);
   outline-offset: 2px;
-  border-radius: 6px;
 }

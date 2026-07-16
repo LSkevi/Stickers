@@ -12,12 +12,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Álbum — World Cup 2026 Stickers',
-        short_name: 'Álbum',
+        name: 'Álbum Copa 2026',
+        short_name: 'Copa 2026',
         description:
-          'Track your World Cup 2026 sticker collection — what you have, what you need, and your doubles for trading.',
-        theme_color: '#0e1613',
-        background_color: '#0e1613',
+          'Álbum de figurinhas da Copa 2026 — marque as que você tem, as repetidas e veja o que falta.',
+        lang: 'pt-BR',
+        theme_color: '#f5f5f0',
+        background_color: '#f5f5f0',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
@@ -35,22 +36,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
-        // Cache country flag images so the album works fully offline once seen.
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/flagcdn\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'flag-images',
-              expiration: {
-                maxEntries: 300,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
       },
       devOptions: { enabled: false },
     }),
