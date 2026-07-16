@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Camera, Check, Minus, Plus, Trash2, X, Pencil } from 'lucide-react'
 import { Flag } from './Flag'
 import { RARITY, STICKER_BY_ID } from '../data/stickers'
+import { CONF_LABEL } from '../data/teams'
 import { albumStore, useAlbum } from '../store/collection'
 import { fileToStickerPhoto } from '../lib/image'
 
@@ -81,7 +82,7 @@ export function StickerSheet({ stickerId, onClose }: Props) {
       >
         <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--line)] bg-[var(--bg-2)]/90 px-4 py-3 backdrop-blur">
           <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--muted)] tnum">
-            No. {sticker.no} · Group {sticker.group === 'SP' ? '★' : sticker.group}
+            {sticker.id} · {CONF_LABEL[sticker.conf] ?? sticker.conf}
           </span>
           <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5" aria-label="Close">
             <X size={18} />

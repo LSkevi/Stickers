@@ -1,175 +1,162 @@
-import { TEAMS, type Team } from './teams'
+import { TEAMS, CONF_ORDER, type Team } from './teams'
 
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary'
-export type Kind = 'badge' | 'player' | 'legend' | 'special'
+export type Kind = 'badge' | 'lineup' | 'player' | 'special'
 
 export interface Sticker {
-  id: string
-  no: number // album number
+  id: string // real album code, e.g. "ARG-1"
+  no: number // number within its team/section (matches the printed sticker)
   name: string
   subtitle: string
   team: string // team / section name
   teamCode: string // flagcdn code ('' when there is no flag)
   emoji: string
-  group: string // group letter, or 'SP' for the special section
-  conf: string
+  conf: string // confederation, or 'FIFA' for specials
   rarity: Rarity
   kind: Kind
 }
 
 export const RARITY: Record<
   Rarity,
-  { label: string; ring: string; text: string; dot: string; glow: string; order: number }
+  { label: string; ring: string; text: string; dot: string; order: number }
 > = {
-  common: { label: 'Common', ring: 'var(--r-common)', text: 'var(--r-common)', dot: 'var(--r-common)', glow: 'transparent', order: 0 },
-  rare: { label: 'Rare', ring: 'var(--r-rare)', text: 'var(--r-rare)', dot: 'var(--r-rare)', glow: 'color-mix(in srgb, var(--r-rare) 40%, transparent)', order: 1 },
-  epic: { label: 'Epic', ring: 'var(--r-epic)', text: 'var(--r-epic)', dot: 'var(--r-epic)', glow: 'color-mix(in srgb, var(--r-epic) 45%, transparent)', order: 2 },
-  legendary: { label: 'Legendary', ring: 'var(--r-legendary)', text: 'var(--r-legendary)', dot: 'var(--r-legendary)', glow: 'color-mix(in srgb, var(--r-legendary) 60%, transparent)', order: 3 },
+  common: { label: 'Common', ring: 'var(--r-common)', text: 'var(--r-common)', dot: 'var(--r-common)', order: 0 },
+  rare: { label: 'Rare', ring: 'var(--r-rare)', text: 'var(--r-rare)', dot: 'var(--r-rare)', order: 1 },
+  epic: { label: 'Epic', ring: 'var(--r-epic)', text: 'var(--r-epic)', dot: 'var(--r-epic)', order: 2 },
+  legendary: { label: 'Legendary', ring: 'var(--r-legendary)', text: 'var(--r-legendary)', dot: 'var(--r-legendary)', order: 3 },
 }
 
-const PLAYERS_PER_TEAM = 18
+const STICKERS_PER_TEAM = 20
 
-function teamStickers(team: Team, startNo: number): { list: Sticker[]; next: number } {
+function teamStickers(team: Team): Sticker[] {
   const list: Sticker[] = []
-  let no = startNo
+  for (let n = 1; n <= STICKERS_PER_TEAM; n++) {
+    let name: string
+    let subtitle: string
+    let kind: Kind
+    let rarity: Rarity
 
-  // Team badge
-  list.push({
-    id: `${team.code}-badge`,
-    no: no++,
-    name: `${team.name} Badge`,
-    subtitle: 'Team Crest',
-    team: team.name,
-    teamCode: team.code,
-    emoji: team.emoji,
-    group: team.group,
-    conf: team.conf,
-    rarity: 'epic',
-    kind: 'badge',
-  })
-
-  // Team photo
-  list.push({
-    id: `${team.code}-squad`,
-    no: no++,
-    name: `${team.name} Squad`,
-    subtitle: 'Team Photo',
-    team: team.name,
-    teamCode: team.code,
-    emoji: team.emoji,
-    group: team.group,
-    conf: team.conf,
-    rarity: 'rare',
-    kind: 'special',
-  })
-
-  for (let i = 0; i < PLAYERS_PER_TEAM; i++) {
-    const jersey = i + 1
-    const star = team.stars[i]
-    let rarity: Rarity = 'common'
-    if (i === 0) rarity = 'legendary'
-    else if (i === 1) rarity = 'epic'
-    else if (i === 2 || i === 3) rarity = 'rare'
+    if (n === 1) {
+      name = `${team.name} Badge`
+      subtitle = 'Team Crest'
+      kind = 'badge'
+      rarity = 'epic'
+    } else if (n === 2) {
+      name = `${team.name} Line-up`
+      subtitle = 'Team Photo'
+      kind = 'lineup'
+      rarity = 'rare'
+    } else {
+      const idx = n - 3 // player index
+      const star = team.stars[idx]
+      name = star ?? `${team.name} No. ${n}`
+      subtitle = star ? 'Star Player' : `Squad · No. ${n}`
+      kind = 'player'
+      if (n === 3) rarity = 'legendary'
+      else if (n === 4) rarity = 'epic'
+      else if (n === 5 || n === 6) rarity = 'rare'
+      else rarity = 'common'
+    }
 
     list.push({
-      id: `${team.code}-p${jersey}`,
-      no: no++,
-      name: star ?? `${team.name} No. ${jersey}`,
-      subtitle: star ? 'Star Player' : `Squad · No. ${jersey}`,
+      id: `${team.code}-${n}`,
+      no: n,
+      name,
+      subtitle,
       team: team.name,
-      teamCode: team.code,
+      teamCode: team.flag,
       emoji: team.emoji,
-      group: team.group,
       conf: team.conf,
       rarity,
-      kind: 'player',
+      kind,
     })
   }
-
-  return { list, next: no }
+  return list
 }
 
-// Legends of the World Cup — iconic retired players (legendary rarity).
-const LEGENDS: { name: string; team: string; code: string; emoji: string }[] = [
-  { name: 'Pelé', team: 'Brazil', code: 'br', emoji: '🇧🇷' },
-  { name: 'Diego Maradona', team: 'Argentina', code: 'ar', emoji: '🇦🇷' },
-  { name: 'Zinedine Zidane', team: 'France', code: 'fr', emoji: '🇫🇷' },
-  { name: 'Ronaldo Nazário', team: 'Brazil', code: 'br', emoji: '🇧🇷' },
-  { name: 'Franz Beckenbauer', team: 'Germany', code: 'de', emoji: '🇩🇪' },
-  { name: 'Johan Cruyff', team: 'Netherlands', code: 'nl', emoji: '🇳🇱' },
-  { name: 'Paolo Maldini', team: 'Italy', code: 'it', emoji: '🇮🇹' },
-  { name: 'Bobby Charlton', team: 'England', code: 'gb-eng', emoji: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+// ---------------------------------------------------------------------------
+// Special sections. These codes (FWC, CC, DD) appear in Luan's checklist; the
+// exact printed names/sizes aren't published, so they use generic, editable
+// names. Adjust the counts below if the real album differs.
+// ---------------------------------------------------------------------------
+
+interface SpecialSpec {
+  code: string
+  team: string
+  emoji: string
+  count: number
+  name: (n: number) => string
+  emojiFor?: (n: number) => string
+  rarityFor?: (n: number) => Rarity
+}
+
+const SPECIALS: SpecialSpec[] = [
+  {
+    code: 'FWC',
+    team: 'FIFA World Cup',
+    emoji: '🏆',
+    count: 20,
+    name: (n) =>
+      n === 1 ? 'World Cup Trophy'
+      : n === 2 ? 'Official Emblem'
+      : n === 3 ? 'Mascots — Maple, Zayu & Clutch'
+      : n === 4 ? 'Official Match Ball'
+      : `FIFA World Cup ${n}`,
+    emojiFor: (n) => (n === 1 ? '🏆' : n === 2 ? '🛡️' : n === 3 ? '🎉' : n === 4 ? '⚽' : '🌎'),
+    rarityFor: (n) => (n === 1 ? 'legendary' : n <= 3 ? 'epic' : n <= 8 ? 'rare' : 'common'),
+  },
+  {
+    code: 'CC',
+    team: 'Special Cards',
+    emoji: '⭐',
+    count: 12,
+    name: (n) => `Special Card ${n}`,
+    rarityFor: (n) => (n <= 4 ? 'epic' : 'rare'),
+  },
+  {
+    code: 'DD',
+    team: 'Special Cards',
+    emoji: '✨',
+    count: 1,
+    name: (n) => `Special Edition ${n}`,
+    rarityFor: () => 'legendary',
+  },
 ]
 
-// Tournament specials — no national flag, rendered with a gradient + emoji.
-const SPECIALS: { name: string; subtitle: string; emoji: string; rarity: Rarity }[] = [
-  { name: 'FIFA World Cup Trophy', subtitle: 'The Prize', emoji: '🏆', rarity: 'legendary' },
-  { name: 'Official Match Ball', subtitle: 'Adidas', emoji: '⚽', rarity: 'epic' },
-  { name: 'Tournament Mascots', subtitle: 'Maple, Zayu & Clutch', emoji: '🎉', rarity: 'epic' },
-  { name: 'Host Nations 2026', subtitle: 'Canada · Mexico · USA', emoji: '🌎', rarity: 'rare' },
-  { name: 'MetLife Stadium', subtitle: 'Final — New York/NJ', emoji: '🏟️', rarity: 'rare' },
-  { name: 'Estadio Azteca', subtitle: 'Opening — Mexico City', emoji: '🏟️', rarity: 'rare' },
-]
-
-function buildStickers(): Sticker[] {
-  const all: Sticker[] = []
-  let no = 1
-
-  const ordered = [...TEAMS].sort((a, b) =>
-    a.group === b.group ? a.name.localeCompare(b.name) : a.group.localeCompare(b.group),
-  )
-
-  for (const team of ordered) {
-    const { list, next } = teamStickers(team, no)
-    all.push(...list)
-    no = next
-  }
-
-  for (let i = 0; i < LEGENDS.length; i++) {
-    const l = LEGENDS[i]
-    all.push({
-      id: `legend-${i}`,
-      no: no++,
-      name: l.name,
-      subtitle: `Legend · ${l.team}`,
-      team: 'Legends',
-      teamCode: l.code,
-      emoji: l.emoji,
-      group: 'SP',
-      conf: 'FIFA',
-      rarity: 'legendary',
-      kind: 'legend',
-    })
-  }
-
-  for (let i = 0; i < SPECIALS.length; i++) {
-    const s = SPECIALS[i]
-    all.push({
-      id: `special-${i}`,
-      no: no++,
-      name: s.name,
-      subtitle: s.subtitle,
-      team: 'Tournament',
+function specialStickers(spec: SpecialSpec): Sticker[] {
+  const list: Sticker[] = []
+  for (let n = 1; n <= spec.count; n++) {
+    list.push({
+      id: `${spec.code}-${n}`,
+      no: n,
+      name: spec.name(n),
+      subtitle: spec.team,
+      team: spec.team,
       teamCode: '',
-      emoji: s.emoji,
-      group: 'SP',
+      emoji: spec.emojiFor ? spec.emojiFor(n) : spec.emoji,
       conf: 'FIFA',
-      rarity: s.rarity,
+      rarity: spec.rarityFor ? spec.rarityFor(n) : 'common',
       kind: 'special',
     })
   }
+  return list
+}
 
+function buildStickers(): Sticker[] {
+  const all: Sticker[] = []
+  const ordered = [...TEAMS].sort((a, b) => {
+    const ca = CONF_ORDER.indexOf(a.conf)
+    const cb = CONF_ORDER.indexOf(b.conf)
+    return ca === cb ? a.name.localeCompare(b.name) : ca - cb
+  })
+  for (const team of ordered) all.push(...teamStickers(team))
+  for (const spec of SPECIALS) all.push(...specialStickers(spec))
   return all
 }
 
 export const STICKERS: Sticker[] = buildStickers()
 export const TOTAL_STICKERS = STICKERS.length
 
-// Fast lookup by id.
 export const STICKER_BY_ID: Record<string, Sticker> = Object.fromEntries(
   STICKERS.map((s) => [s.id, s]),
-)
-
-export const STICKER_INDEX: Record<string, number> = Object.fromEntries(
-  STICKERS.map((s, i) => [s.id, i]),
 )

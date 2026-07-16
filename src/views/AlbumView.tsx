@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Layers } from 'lucide-react'
+import { Layers, Sparkles } from 'lucide-react'
 import { STICKERS, type Sticker } from '../data/stickers'
-import { useAlbum } from '../store/collection'
+import { CONF_LABEL, CONF_ORDER } from '../data/teams'
+import { albumStore, useAlbum, useStats } from '../store/collection'
+import { luanCounts, LUAN_SUMMARY } from '../data/luan'
 import { StickerCard } from '../components/StickerCard'
 import { Chip, EmptyState, Segmented } from '../components/ui'
-import { albumStore } from '../store/collection'
 
 type Status = 'all' | 'have' | 'need'
 
@@ -12,16 +13,15 @@ interface Props {
   onOpen: (id: string) => void
 }
 
-const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'SP']
-
 export function AlbumView({ onOpen }: Props) {
   const data = useAlbum()
-  const [group, setGroup] = useState<string>('all')
+  const stats = useStats()
+  const [conf, setConf] = useState<string>('all')
   const [status, setStatus] = useState<Status>('all')
 
   const sections = useMemo(() => {
     const filtered = STICKERS.filter((s) => {
-      if (group !== 'all' && s.group !== group) return false
+      if (conf !== 'all' && s.conf !== conf) return false
       const count = data.entries[s.id]?.count ?? 0
       if (status === 'have' && count <= 0) return false
       if (status === 'need' && count > 0) return false
@@ -29,25 +29,41 @@ export function AlbumView({ onOpen }: Props) {
     })
     const map = new Map<string, Sticker[]>()
     for (const s of filtered) {
-      const key = s.team
-      if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(s)
+      if (!map.has(s.team)) map.set(s.team, [])
+      map.get(s.team)!.push(s)
     }
     return [...map.entries()]
-  }, [group, status, data.entries])
+  }, [conf, status, data.entries])
 
   const quickToggle = (id: string) => albumStore.toggleHave(id)
 
   return (
     <div className="px-4 pb-28 pt-2">
-      {/* Group filter */}
+      {/* First-run welcome — load Luan's real collection in one tap */}
+      {stats.owned === 0 && (
+        <div className="mb-4 rounded-3xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 p-4">
+          <p className="text-lg font-extrabold">👋 Welcome, Luan!</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Load the stickers from your list — {LUAN_SUMMARY.owned} already collected, including{' '}
+            {LUAN_SUMMARY.doubles} doubles to trade.
+          </p>
+          <button
+            onClick={() => albumStore.applyCounts(luanCounts())}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] py-3 font-extrabold text-black active:scale-[0.99]"
+          >
+            <Sparkles size={18} /> I'm Luan — load my album
+          </button>
+        </div>
+      )}
+
+      {/* Confederation filter */}
       <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <Chip active={group === 'all'} onClick={() => setGroup('all')}>
+        <Chip active={conf === 'all'} onClick={() => setConf('all')}>
           All
         </Chip>
-        {GROUPS.map((g) => (
-          <Chip key={g} active={group === g} onClick={() => setGroup(g)}>
-            {g === 'SP' ? '★ Specials' : `Group ${g}`}
+        {CONF_ORDER.map((c) => (
+          <Chip key={c} active={conf === c} onClick={() => setConf(c)}>
+            {CONF_LABEL[c]}
           </Chip>
         ))}
       </div>
@@ -71,7 +87,7 @@ export function AlbumView({ onOpen }: Props) {
           note={
             status === 'need'
               ? 'Every sticker in this view is already in the album. Nice work.'
-              : 'Try a different group or filter.'
+              : 'Try a different filter.'
           }
         />
       ) : (

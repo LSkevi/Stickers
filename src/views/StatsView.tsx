@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 import { Repeat2 } from 'lucide-react'
 import { RARITY, STICKERS, type Rarity } from '../data/stickers'
+import { CONF_LABEL, CONF_ORDER } from '../data/teams'
 import { useAlbum, useStats } from '../store/collection'
 import { ProgressRing } from '../components/ProgressRing'
 import { Flag } from '../components/Flag'
 
-const GROUP_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 const RARITIES: Rarity[] = ['legendary', 'epic', 'rare', 'common']
 
 interface Props {
@@ -18,12 +18,12 @@ export function StatsView({ onOpen }: Props) {
 
   const owned = (id: string) => (data.entries[id]?.count ?? 0) > 0
 
-  const byGroup = useMemo(
+  const byConf = useMemo(
     () =>
-      GROUP_LETTERS.map((g) => {
-        const list = STICKERS.filter((s) => s.group === g)
-        return { g, owned: list.filter((s) => owned(s.id)).length, total: list.length }
-      }),
+      CONF_ORDER.map((c) => {
+        const list = STICKERS.filter((s) => s.conf === c)
+        return { c, owned: list.filter((s) => owned(s.id)).length, total: list.length }
+      }).filter((x) => x.total > 0),
     [data.entries],
   )
 
@@ -95,15 +95,15 @@ export function StatsView({ onOpen }: Props) {
         ))}
       </div>
 
-      {/* Group completion */}
-      <h3 className="mb-2 mt-6 text-sm font-bold uppercase tracking-widest text-[var(--muted)]">By group</h3>
+      {/* Confederation completion */}
+      <h3 className="mb-2 mt-6 text-sm font-bold uppercase tracking-widest text-[var(--muted)]">By region</h3>
       <div className="grid grid-cols-2 gap-2.5">
-        {byGroup.map(({ g, owned: o, total }) => {
+        {byConf.map(({ c, owned: o, total }) => {
           const done = o === total
           return (
-            <div key={g} className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+            <div key={c} className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
               <div className="mb-1.5 flex items-center justify-between">
-                <span className="font-display text-lg">Group {g}</span>
+                <span className="text-base font-extrabold">{CONF_LABEL[c]}</span>
                 <span className="text-sm font-bold tnum" style={{ color: done ? 'var(--accent)' : 'var(--muted)' }}>
                   {done ? '✓' : `${o}/${total}`}
                 </span>

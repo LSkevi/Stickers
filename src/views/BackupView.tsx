@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
-import { Download, Upload, ShieldCheck, Smartphone, RotateCcw, Share } from 'lucide-react'
+import { Download, Upload, ShieldCheck, Smartphone, RotateCcw, Share, Sparkles } from 'lucide-react'
 import { albumStore, useAlbum, useStats } from '../store/collection'
+import { luanCounts, LUAN_SUMMARY } from '../data/luan'
 import { useInstallPrompt } from '../lib/pwa'
 
 export function BackupView() {
@@ -58,6 +59,30 @@ export function BackupView() {
           placeholder="Your name"
         />
       </label>
+
+      {/* Load Luan's preset collection */}
+      <button
+        onClick={() => {
+          const changed = albumStore.applyCounts(luanCounts())
+          setMsg({
+            kind: 'ok',
+            text: changed
+              ? `Loaded Luan's list — ${LUAN_SUMMARY.owned} collected, ${LUAN_SUMMARY.doubles} doubles.`
+              : "Luan's list is already loaded. ✓",
+          })
+        }}
+        className="mb-4 flex w-full items-center gap-3 rounded-3xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 p-4 text-left active:scale-[0.99]"
+      >
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--gold)] text-black">
+          <Sparkles size={22} />
+        </span>
+        <div>
+          <p className="font-extrabold">I'm Luan — load my album</p>
+          <p className="text-sm text-[var(--muted)]">
+            {LUAN_SUMMARY.owned} stickers + {LUAN_SUMMARY.doubles} doubles from your list
+          </p>
+        </div>
+      </button>
 
       {/* Data safety card */}
       <div className="rounded-3xl border border-[var(--accent)]/25 bg-[var(--accent)]/8 p-5">

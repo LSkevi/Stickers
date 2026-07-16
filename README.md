@@ -7,8 +7,14 @@ the device automatically, so nothing gets lost.
 
 ## Features
 
-- **Full 974-sticker checklist** — 48 national teams across 12 groups, plus a
-  Legends section and tournament specials (trophy, ball, mascots, stadiums).
+- **"I'm Luan" one-tap load** — the welcome banner (and the Backup tab) has a
+  button that loads Luan's real checklist: every sticker on his `COLADAS` list
+  becomes _collected_, and each `REPETIDAS` adds that many _doubles_ (the
+  `x2` / `x3` counts are respected). Safe to tap again — it only ever adds.
+- **Full 993-sticker checklist** — his real 48-team album (grouped by
+  confederation) with **real squad rosters** from the official Panini FIFA
+  World Cup 2026 checklist, plus the special sections (FIFA World Cup trophy,
+  emblem, mascots + special cards).
 - **Real flag artwork** on every sticker, with a jersey-style design and a
   rarity ring (Common · Rare · Epic · **Legendary**, with a holographic shine).
 - **Add real photos** — tap any sticker → _Add real photo_ to snap or pick the
@@ -61,10 +67,17 @@ npm run gen:icons  # regenerate the PWA/app icons from scripts/gen-icons.mjs
 
 ## Editing the checklist
 
-The sticker data lives in `src/data/teams.ts` (teams, groups, star players) and
-`src/data/stickers.ts` (how each team's stickers are generated, plus Legends and
-specials). Every sticker is also renameable in-app via the ✏️ on its detail
-sheet, so rosters can be corrected as the real 2026 squads are confirmed.
+- `src/data/teams.ts` — the 48 teams (album code, flag, confederation, star
+  players).
+- `src/data/stickers.ts` — how each team's 20 stickers are generated, plus the
+  special sections. The **FWC / CC / DD** special-section names and sizes are a
+  best guess (the printed checklist isn't published); adjust the `SPECIALS`
+  block there if the real album differs.
+- `src/data/luan.ts` — Luan's `COLADAS` / `REPETIDAS` lists that power the
+  "I'm Luan" button. Paste updated lists here anytime.
+
+Every sticker is also renameable in-app via the ✏️ on its detail sheet, so
+player names can be corrected as the real 2026 squads are confirmed.
 
 ## Tech
 

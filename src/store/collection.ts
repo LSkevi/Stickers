@@ -149,6 +149,24 @@ class AlbumStore {
     this.commit(emptyData())
   }
 
+  /**
+   * Merge a { stickerId: count } map into the album, keeping the higher count
+   * per sticker. Used by the "I'm Luan" preset — safe to run repeatedly, and it
+   * never lowers a count you've already set.
+   */
+  applyCounts(counts: Record<string, number>): number {
+    const entries = { ...this.data.entries }
+    let changed = 0
+    for (const [id, count] of Object.entries(counts)) {
+      const cur = entries[id] ?? { count: 0 }
+      const next = Math.max(cur.count, Math.max(0, Math.round(count)))
+      if (next !== cur.count) changed += 1
+      entries[id] = { ...cur, count: next }
+    }
+    this.commit({ ...this.data, entries })
+    return changed
+  }
+
   export(): string {
     return JSON.stringify(this.data, null, 2)
   }
